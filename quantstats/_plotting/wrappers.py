@@ -73,7 +73,6 @@ def snapshot(
     log_scale=False,
     **kwargs,
 ):
-
     strategy_colname = kwargs.get("strategy_col", "Strategy")
 
     multi_column = False
@@ -277,7 +276,6 @@ def earnings(
     savefig=None,
     show=True,
 ):
-
     colors = _GRAYSCALE_COLORS if grayscale else _FLATUI_COLORS
     alpha = 0.5 if grayscale else 0.8
 
@@ -389,7 +387,6 @@ def returns(
     show=True,
     prepare_returns=True,
 ):
-
     title = "Cumulative Returns" if compound else "Returns"
     if benchmark is not None:
         if isinstance(benchmark, str):
@@ -443,7 +440,6 @@ def log_returns(
     show=True,
     prepare_returns=True,
 ):
-
     title = "Cumulative Returns" if compound else "Returns"
     if benchmark is not None:
         if isinstance(benchmark, str):
@@ -498,7 +494,6 @@ def daily_returns(
     prepare_returns=True,
     active=False,
 ):
-
     if prepare_returns:
         returns = _utils._prepare_returns(returns)
         if active and benchmark is not None:
@@ -546,7 +541,6 @@ def yearly_returns(
     show=True,
     prepare_returns=True,
 ):
-
     title = "EOY Returns"
     if benchmark is not None:
         title += "  vs Benchmark"
@@ -636,7 +630,6 @@ def histogram(
     show=True,
     prepare_returns=True,
 ):
-
     if prepare_returns:
         returns = _utils._prepare_returns(returns)
         if benchmark is not None:
@@ -684,7 +677,6 @@ def drawdown(
     savefig=None,
     show=True,
 ):
-
     dd = _stats.to_drawdown_series(returns)
 
     fig = _core.plot_timeseries(
@@ -767,7 +759,6 @@ def rolling_beta(
     show=True,
     prepare_returns=True,
 ):
-
     if prepare_returns:
         returns = _utils._prepare_returns(returns)
 
@@ -809,7 +800,6 @@ def rolling_volatility(
     savefig=None,
     show=True,
 ):
-
     returns = _stats.rolling_volatility(returns, period, periods_per_year)
 
     if benchmark is not None:
@@ -853,7 +843,6 @@ def rolling_sharpe(
     savefig=None,
     show=True,
 ):
-
     returns = _stats.rolling_sharpe(
         returns,
         rf,
@@ -903,7 +892,6 @@ def rolling_sortino(
     savefig=None,
     show=True,
 ):
-
     returns = _stats.rolling_sortino(returns, rf, period, True, periods_per_year)
 
     if benchmark is not None:
@@ -1088,3 +1076,29 @@ def monthly_returns(
         savefig=savefig,
         show=show,
     )
+
+
+def industry_distribution(data, savefig, figsize=(10, 5)):
+    x_axis = data.index
+
+    fig, ax = _plt.subplots(figsize=figsize)
+    ax.bar(x_axis, data)
+    ax.set_title(
+        "Industry Distribution (Top 20)\n",
+        fontsize=14,
+        y=0.995,
+        fontweight="bold",
+        color="black",
+    )
+    ax.tick_params(labelrotation=90)
+    fig.subplots_adjust(hspace=0, bottom=0, top=1)
+    fig.tight_layout(w_pad=0, h_pad=0)
+    ax.set_xlabel("Industry")
+    ax.set_ylabel("Number of positions")
+
+    if isinstance(savefig, dict):
+        fig.savefig(**savefig)
+    else:
+        fig.savefig(savefig)
+
+    return fig
