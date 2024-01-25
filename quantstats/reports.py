@@ -65,9 +65,9 @@ def html(
     template_path=None,
     match_dates=True,
     industry_dist: _pd.Series = None,
+    daily_report: _pd.DataFrame = None,
     **kwargs,
 ):
-
     if output is None and not _utils._in_notebook():
         raise ValueError("`output` must be specified")
 
@@ -150,9 +150,7 @@ def html(
     tpl = tpl.replace(
         "<tr><td></td><td></td><td></td></tr>", '<tr><td colspan="3"><hr></td></tr>'
     )
-    tpl = tpl.replace(
-        "<tr><td></td><td></td></tr>", '<tr><td colspan="2"><hr></td></tr>'
-    )
+    tpl = tpl.replace("<tr><td></td><td></td></tr>", '<tr><td colspan="2"><hr></td></tr>')
 
     if benchmark is not None:
         yoy = _stats.compare(
@@ -161,9 +159,7 @@ def html(
         if isinstance(returns, _pd.Series):
             yoy.columns = [benchmark_title, strategy_title, "Multiplier", "Won"]
         elif isinstance(returns, _pd.DataFrame):
-            yoy.columns = list(
-                _pd.core.common.flatten([benchmark_title, strategy_title])
-            )
+            yoy.columns = list(_pd.core.common.flatten([benchmark_title, strategy_title]))
         yoy.index.name = "Year"
         tpl = tpl.replace("{{eoy_title}}", "<h3>EOY Returns vs Benchmark</h3>")
         tpl = tpl.replace("{{eoy_table}}", _html_table(yoy))
@@ -486,6 +482,14 @@ def html(
         )
         tpl = tpl.replace("{{industry_dist}}", _embed_figure(figfile, figfmt))
 
+    # if daily_report is not None:
+    #     figfile = _utils._file_stream()
+    #     _plots.industry_distribution(
+    #         daily_report,
+    #         savefig={"fname": figfile, "format": figfmt},
+    #     )
+    #     tpl = tpl.replace("{{industry_dist}}", _embed_figure(figfile, figfmt))
+
     tpl = _regex.sub(r"\{\{(.*?)\}\}", "", tpl)
     tpl = tpl.replace("white-space:pre;", "")
 
@@ -583,8 +587,7 @@ def full(
             for ptf, dd_info in dd_info_dict.items():
                 iDisplay(
                     iHTML(
-                        '<h4 style="margin-bottom:20px">%s - Worst 5 Drawdowns</h4>'
-                        % ptf
+                        '<h4 style="margin-bottom:20px">%s - Worst 5 Drawdowns</h4>' % ptf
                     )
                 )
                 if dd_info.empty:
@@ -614,9 +617,7 @@ def full(
                 print("(no drawdowns)")
             else:
                 print(
-                    _tabulate(
-                        dd_info, headers="keys", tablefmt="simple", floatfmt=".2f"
-                    )
+                    _tabulate(dd_info, headers="keys", tablefmt="simple", floatfmt=".2f")
                 )
         elif isinstance(dd, _pd.DataFrame):
             for ptf, dd_info in dd_info_dict.items():
@@ -879,17 +880,13 @@ def metrics(
             )
         elif isinstance(returns, _pd.DataFrame):
             ret_vol = [
-                _stats.volatility(
-                    df[strategy_col], win_year, True, prepare_returns=False
-                )
+                _stats.volatility(df[strategy_col], win_year, True, prepare_returns=False)
                 * pct
                 for strategy_col in df_strategy_columns
             ]
         if "benchmark" in df:
             bench_vol = (
-                _stats.volatility(
-                    df["benchmark"], win_year, True, prepare_returns=False
-                )
+                _stats.volatility(df["benchmark"], win_year, True, prepare_returns=False)
                 * pct
             )
 
@@ -936,8 +933,7 @@ def metrics(
         metrics["~~~~~~~~~~"] = blank
 
         metrics["Expected Daily %%"] = (
-            _stats.expected_return(df, compounded=compounded, prepare_returns=False)
-            * pct
+            _stats.expected_return(df, compounded=compounded, prepare_returns=False) * pct
         )
         metrics["Expected Monthly %%"] = (
             _stats.expected_return(
@@ -1033,9 +1029,7 @@ def metrics(
             * pct
         )
         metrics["Worst Year %"] = (
-            _stats.worst(
-                df, compounded=compounded, aggregate="A", prepare_returns=False
-            )
+            _stats.worst(df, compounded=compounded, aggregate="A", prepare_returns=False)
             * pct
         )
 
@@ -1121,8 +1115,7 @@ def metrics(
                 metrics["Alpha"] = [str(round(g["alpha"], 2)) for g in greeks] + ["-"]
                 metrics["Correlation"] = (
                     [
-                        str(round(df["benchmark"].corr(df[strategy_col]) * pct, 2))
-                        + "%"
+                        str(round(df["benchmark"].corr(df[strategy_col]) * pct, 2)) + "%"
                         for strategy_col in df_strategy_columns
                     ]
                 ) + ["-"]
